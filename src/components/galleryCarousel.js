@@ -1,5 +1,5 @@
 "use client";
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 
 const images = [
@@ -14,6 +14,21 @@ const images = [
 
 const Carousel = () => {
   const [current, setCurrent] = useState(2);
+  const [offsetX, setOffsetX] = useState(250);
+
+  useEffect(() => {
+    const updateOffset = () => {
+      if (typeof window !== "undefined") {
+        if (window.innerWidth < 640) setOffsetX(180);
+        else if (window.innerWidth < 1024) setOffsetX(220);
+        else setOffsetX(250);
+      }
+    };
+
+    updateOffset();
+    window.addEventListener("resize", updateOffset);
+    return () => window.removeEventListener("resize", updateOffset);
+  }, []);
 
   const nextSlide = () => {
     setCurrent((prev) => (prev + 1) % images.length);
@@ -35,12 +50,7 @@ const Carousel = () => {
               animate={{
                 scale: offset === 0 ? 1 : 0.8,
                 opacity: Math.abs(offset) > 1 ? 0 : 1,
-                x:
-                  offset * (window.innerWidth < 640
-                    ? 180
-                    : window.innerWidth < 1024
-                    ? 220
-                    : 250),
+                x: offset * offsetX,
                 zIndex: offset === 0 ? 10 : 5,
               }}
               transition={{ type: "spring", stiffness: 200, damping: 20 }}
